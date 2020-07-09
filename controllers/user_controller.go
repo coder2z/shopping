@@ -5,6 +5,7 @@ import (
 	"net/http"
 	R "shopping/response"
 	"shopping/services"
+	"shopping/utils"
 )
 
 type UserController struct {
@@ -17,9 +18,9 @@ type UserImp interface {
 	Info(*gin.Context)
 }
 
-func NewUserController(userServices services.UserServiceImp) UserImp {
-	return &UserController{UserServices: userServices}
-}
+//func NewUserController(userServices services.UserServiceImp) UserImp {
+//	return &UserController{UserServices: userServices}
+//}
 
 func (l *UserController) Login(c *gin.Context) {
 	var loginService services.UserLoginService
@@ -51,9 +52,10 @@ func (l *UserController) Register(c *gin.Context) {
 }
 
 func (l *UserController) Info(c *gin.Context) {
-	email, exists := c.Get("email")
+	userInfo, exists := c.Get("jwtUserInfo")
 	if exists {
-		if userInfo, err := l.UserServices.Info(email.(string)); err == nil {
+		info := userInfo.(utils.JwtUserInfo)
+		if userInfo, err := l.UserServices.Info(info.Email); err == nil {
 			R.Ok(c, "成功", gin.H{
 				"email":    userInfo.Email,
 				"userName": userInfo.UserName,

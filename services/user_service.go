@@ -29,9 +29,9 @@ type UserService struct {
 	UserRepository repositories.UserRepositoryImp `inject:""`
 }
 
-func NewUserServices(repository repositories.UserRepositoryImp) UserServiceImp {
-	return &UserService{repository}
-}
+//func NewUserServices(repository repositories.UserRepositoryImp) UserServiceImp {
+//	return &UserService{repository}
+//}
 
 func (u *UserService) Login(server *UserLoginService) (token string, err error) {
 	userInfo, err := u.UserRepository.GetUserByEmail(server.Email)
@@ -41,7 +41,8 @@ func (u *UserService) Login(server *UserLoginService) (token string, err error) 
 	if ok := userInfo.CheckPassword(server.Password); !ok {
 		return "", errors.New("用户名或者密码错误")
 	}
-	token, err = utils.GenerateToken(server.Email)
+	jwtUserInfo := utils.JwtUserInfo{Email: userInfo.Email, Id: userInfo.ID, Username: userInfo.UserName}
+	token, err = jwtUserInfo.GenerateToken()
 	if err != nil {
 		return "", errors.New("token生成失败")
 	}

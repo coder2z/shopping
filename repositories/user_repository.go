@@ -13,11 +13,11 @@ type UserRepositoryImp interface {
 	DelUser(id int) error
 }
 
-func NewUserRepository() UserRepositoryImp {
-	return &UserManagerRepository{
-		Db: models.MysqlHandler,
-	}
-}
+//func NewUserRepository() UserRepositoryImp {
+//	return &UserManagerRepository{
+//		Db: models.MysqlHandler,
+//	}
+//}
 
 type UserManagerRepository struct {
 	Db *gorm.DB

@@ -6,23 +6,29 @@ import (
 	"time"
 )
 
-const JwtSecret = "jdnsakjbduiiudu"
+const JwtSecret = "kih**&hgyshq##js"
 
 // JWT 签名结构
 type JWT struct {
 	SigningKey []byte
 }
 
-type UserInfo struct {
-	Id       int    `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Status   int    `json:"status"`
+type JwtImp interface {
+	GenerateToken() (string, error)
+	ParseToken(tokens string) (err error)
 }
 
-func GenerateToken(email string) (string, error) {
+type JwtUserInfo struct {
+	Id       uint   `json:"id"`
+	Username string `json:"username"`
+	Email    string `json:"email"`
+}
+
+func (user *JwtUserInfo) GenerateToken() (string, error) {
 	claim := jwt.MapClaims{
-		"email": email,
+		"email": user.Email,
+		"id":    user.Id,
+		"name":  user.Username,
 		"nbf":   time.Now().Unix(),
 		"iat":   time.Now().Unix(),
 		"exp":   time.Now().Unix() + 3*60*60,
@@ -39,7 +45,7 @@ func secret() jwt.Keyfunc {
 	}
 }
 
-func ParseToken(tokens string) (email string, err error) {
+func (user *JwtUserInfo) ParseToken(tokens string) (err error) {
 	token, err := jwt.Parse(tokens, secret())
 	if err != nil {
 		return
@@ -54,6 +60,8 @@ func ParseToken(tokens string) (email string, err error) {
 		err = errors.New("token is invalid")
 		return
 	}
-	email = claim["email"].(string)
-	return
+	user.Email = claim["email"].(string)
+	user.Username = claim["name"].(string)
+	user.Id = claim["id"].(uint)
+	return err
 }

@@ -91,22 +91,22 @@ func TestInject(t *testing.T) {
 
 func TestNoInject(t *testing.T) {
 
-	models.Init()
-	models.MysqlHandler.AutoMigrate(models.User{})
-	//不使用 Inject
-	repository := repositories.NewUserRepository()
-	userServices := services.NewUserServices(repository)
-	controller := controllers.NewUserController(userServices)
-
-	app := gin.Default()
-	api := app.Group("/api")
-	{
-		api.POST("/login", controller.Login)
-		api.POST("/register", controller.Register)
-		api.GET("/me", middleware.Auth(), controller.Info)
-	}
-
-	_ = app.Run(":8080")
+	//models.Init()
+	//models.MysqlHandler.AutoMigrate(models.User{})
+	////不使用 Inject
+	//repository := repositories.NewUserRepository()
+	//userServices := services.NewUserServices(repository)
+	//controller := controllers.NewUserController(userServices)
+	//
+	//app := gin.Default()
+	//api := app.Group("/api")
+	//{
+	//	api.POST("/login", controller.Login)
+	//	api.POST("/register", controller.Register)
+	//	api.GET("/me", middleware.Auth(), controller.Info)
+	//}
+	//
+	//_ = app.Run(":8080")
 
 }
 

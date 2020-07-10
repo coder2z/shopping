@@ -13,6 +13,7 @@ import (
 
 func InitRouter() *gin.Engine {
 	var userController controllers.UserController
+	var commodityController controllers.CommodityController
 
 	//依赖注入
 	var injector inject.Graph
@@ -20,6 +21,10 @@ func InitRouter() *gin.Engine {
 		&inject.Object{Value: &repositories.UserManagerRepository{Db: models.MysqlHandler}},
 		&inject.Object{Value: &services.UserService{}},
 		&inject.Object{Value: &userController},
+
+		&inject.Object{Value: &repositories.CommodityRepository{Db: models.MysqlHandler}},
+		&inject.Object{Value: &services.CommodityService{}},
+		&inject.Object{Value: &commodityController},
 	)
 	if err != nil {
 		log.Fatal("inject fatal: ", err)
@@ -35,6 +40,12 @@ func InitRouter() *gin.Engine {
 		api.POST("/login", userController.Login)
 		api.POST("/register", userController.Register)
 		api.GET("/me", middleware.Auth(), userController.Info)
+
+		api.POST("/commodity", commodityController.AddCommodity)
+		api.DELETE("/commodity/:id", commodityController.DelCommodity)
+		api.GET("/commodity/:id", commodityController.GetCommodityById)
+		api.GET("/commodity", commodityController.GetCommodity)
+		api.PUT("/commodity/:id", commodityController.UpdateCommodity)
 	}
 	return app
 }

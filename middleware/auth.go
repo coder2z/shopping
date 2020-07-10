@@ -10,6 +10,10 @@ import (
 func Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		token := c.GetHeader("Authorization")
+		if len(token) < 7 {
+			c.Abort()
+			return
+		}
 		jwtUserInfo := utils.JwtUserInfo{}
 		err := jwtUserInfo.ParseToken(token[7:])
 		if err != nil {

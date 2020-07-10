@@ -1,7 +1,6 @@
 package repositories
 
 import (
-	"fmt"
 	"github.com/jinzhu/gorm"
 	"shopping/models"
 )
@@ -30,14 +29,12 @@ func (u *UserManagerRepository) GetUserByEmail(email string) (user *models.User,
 }
 
 func (u *UserManagerRepository) AddUser(user *models.User) (err error) {
-	fmt.Println(u)
-	fmt.Println(u.Db)
 	err = u.Db.Create(user).Error
 	return
 }
 
 func (u *UserManagerRepository) UpdateUser(user *models.User) (err error) {
-	err = u.Db.Update(user).Error
+	err = u.Db.Model(&models.User{}).Update(user).Error
 	return
 }
 

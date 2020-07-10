@@ -10,7 +10,7 @@ require (
 	github.com/facebookgo/structtag v0.0.0-20150214074306-217e25fb9691 // indirect
 	github.com/facebookgo/subset v0.0.0-20200203212716-c811ad88dec4 // indirect
 	github.com/gin-gonic/gin v1.6.3
-	github.com/google/wire v0.4.0
 	github.com/jinzhu/gorm v1.9.14
+	github.com/sirupsen/logrus v1.6.0
 	golang.org/x/crypto v0.0.0-20191205180655-e7c4368fe9dd
 )

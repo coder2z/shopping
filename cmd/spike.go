@@ -15,7 +15,7 @@ import (
 	"shopping/utils"
 )
 
-//基于hash环的分布式权限控制
+//基于hash环的分布式秒杀
 
 var (
 	//分布式集群地址

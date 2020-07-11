@@ -3,13 +3,19 @@ package services
 import (
 	"errors"
 	log "github.com/sirupsen/logrus"
+	"shopping/models"
 	"shopping/repositories"
 	"shopping/utils"
+	"strconv"
 )
 
 type GetOrderPageService struct {
 	PageSize int `json:"page_size" form:"pageSize" binding:"required,numeric"`
 	Page     int `json:"page" form:"page" binding:"required,numeric"`
+}
+
+type MessageService struct {
+	models.Message
 }
 
 type OrderInfo struct {
@@ -24,10 +30,31 @@ type OrderInfo struct {
 
 type OrderServiceImp interface {
 	GetOrder(*GetOrderPageService) (*utils.Page, error)
+	Add(*MessageService) error
 }
 
 type OrderService struct {
 	OrderRepository repositories.OrderRepositoryImp `inject:""`
+}
+
+func (s *OrderService) Add(m *MessageService) (err error) {
+	node, err := utils.NewWorker(int64(m.UserID))
+	if err != nil {
+		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Warningln("创建订单失败")
+		return
+	}
+	orderId := strconv.FormatInt(node.GetId(), 10)
+	orderInfo := models.Order{
+		UserId:      m.UserID,
+		CommodityId: m.CommodityId,
+		OrderId:     orderId,
+	}
+	err = s.OrderRepository.Add(&orderInfo)
+	if err != nil {
+		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Warningln("创建订单失败")
+		return
+	}
+	return
 }
 
 func (s *OrderService) GetOrder(pageInfo *GetOrderPageService) (p *utils.Page, err error) {

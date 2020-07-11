@@ -19,6 +19,8 @@ type CommodityRepositoryImp interface {
 	Del(int) error
 	//更新商品
 	Update(int, *models.Commodity) error
+	//商品库存减去1
+	UpdateStockMinusOne(int) error
 }
 
 type CommodityRepository struct {
@@ -56,5 +58,10 @@ func (r *CommodityRepository) Del(id int) (err error) {
 
 func (r *CommodityRepository) Update(id int, c *models.Commodity) (err error) {
 	err = r.Db.Model(&models.Commodity{}).Where("id=?", id).Update(c).Error
+	return
+}
+
+func (r *CommodityRepository) UpdateStockMinusOne(id int) (err error) {
+	err = r.Db.Model(&models.Commodity{}).Where("id=?", id).UpdateColumn("stock", gorm.Expr("stock - ?", 1)).Error
 	return
 }

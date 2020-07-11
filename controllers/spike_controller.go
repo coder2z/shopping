@@ -1,47 +1,35 @@
 package controllers
 
 import (
-	"fmt"
 	"github.com/gin-gonic/gin"
+	"net/http"
 	R "shopping/response"
+	"shopping/services"
 	"shopping/utils"
 )
 
-type Handler struct {
-	Consistent utils.ConsistentHashImp
-	LocalHost  string
-	HostList   []string
-	Port       string
+type SpikeController struct {
+	spikeService services.SpikeServiceImp
 }
 
-func NewHandler(consistent utils.ConsistentHashImp, hostList []string, port string) *Handler {
-	return &Handler{
-		Consistent: consistent,
-		HostList:   hostList,
-		LocalHost:  "",
-		Port:       port,
-	}
-}
-
-func (h *Handler) Shopping(ctx *gin.Context) {
-	//ctx.Redirect(http.StatusFound, "http://127.0.0.2:8081")
-	userInfo, ok := ctx.Get("jwtUserInfo")
-	if ok {
-		R.Error(ctx, "系统错误", nil)
+func (c *SpikeController) Shopping(ctx *gin.Context) {
+	var spikeServiceUri services.SpikeServiceUri
+	if err := ctx.ShouldBindUri(&spikeServiceUri); err == nil {
+		userInfo, ok := ctx.Get("jwtUserInfo")
+		if ok {
+			R.Error(ctx, "系统错误", nil)
+			return
+		}
+		info := userInfo.(utils.JwtUserInfo)
+		if err := c.spikeService.Shopping(&info, spikeServiceUri.Id, ctx.GetHeader("Authorization")); err == nil {
+			R.Ok(ctx, "抢购成功！", nil)
+			return
+		} else {
+			R.Response(ctx, http.StatusNoContent, err.Error(), nil, http.StatusNoContent)
+			return
+		}
+	} else {
+		R.Response(ctx, http.StatusUnprocessableEntity, "参数错误", err.Error(), http.StatusUnprocessableEntity)
 		return
 	}
-	info := userInfo.(utils.JwtUserInfo)
-	fmt.Println(info)
-
-	//id := strconv.Itoa(int(info.Id))
-	//ip, err := h.Consistent.Get(id)
-	//if err != nil {
-	//	R.Error(ctx, err.Error(), nil)
-	//	return
-	//}
-	//if ip == h.LocalHost {
-	//	//本地处理
-	//} else {
-	//	//代理处理
-	//}
 }

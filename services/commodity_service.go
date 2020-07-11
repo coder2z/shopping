@@ -38,6 +38,8 @@ type CommodityServiceImp interface {
 	AddCommodity(*CommodityFormService) error
 	//删除商品
 	DelCommodity(*GetCommodityIdService) error
+	//商品库存减去一个
+	SubNumberOne(int) error
 }
 
 type CommodityService struct {
@@ -107,6 +109,15 @@ func (s *CommodityService) DelCommodity(idForm *GetCommodityIdService) (err erro
 	if err != nil {
 		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Warningln("删除商品数据失败")
 		return errors.New("删除商品数据失败！")
+	}
+	return
+}
+
+func (s *CommodityService) SubNumberOne(commodityId int) (err error) {
+	err = s.CommodityRepository.UpdateStockMinusOne(commodityId)
+	if err != nil {
+		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Warningln("商品库存修改失败")
+		return errors.New("商品库存修改失败")
 	}
 	return
 }

@@ -17,7 +17,7 @@
 
 ## 架构
 
-[](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/11/20200711230052.png)
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/11/20200711230052.png)
 
 ## 启动
 cd /cmd

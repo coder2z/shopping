@@ -13,7 +13,7 @@ type CommodityFormService struct {
 	Link      string `json:"link" form:"link" binding:"required"`
 	Price     string `json:"price" form:"price" binding:"required"`
 	Stock     int    `json:"stock" form:"stock" binding:"required,numeric"`
-	StartTime string `json:"startTime" form:"start_time" binding:"required"`
+	StartTime int64 `json:"startTime" form:"start_time" binding:"required"`
 }
 
 type GetCommodityPageService struct {

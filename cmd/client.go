@@ -2,7 +2,6 @@ package main
 
 import (
 	"shopping/models"
-	"shopping/rabbitmq"
 	"shopping/repositories"
 	"shopping/services"
 )
@@ -18,6 +17,6 @@ func main() {
 	orderRepository := repositories.OrderRepository{Db: models.MysqlHandler}
 	orderService := services.OrderService{OrderRepository: &orderRepository}
 
-	simple := rabbitmq.NewRabbitMQSimple("myxy99Shopping")
+	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	simple.ConsumeSimple(&orderService, &commodityService)
 }

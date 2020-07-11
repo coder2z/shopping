@@ -19,20 +19,22 @@ type JwtImp interface {
 }
 
 type JwtUserInfo struct {
-	Id       uint   `json:"id"`
-	Username string `json:"username"`
-	Email    string `json:"email"`
+	Id        uint   `json:"id"`
+	Username  string `json:"username"`
+	Email     string `json:"email"`
+	Authority int    `json:"authority"`
 }
 
 func (user *JwtUserInfo) GenerateToken() (string, error) {
 	claim := jwt.MapClaims{
-		"email": user.Email,
-		"id":    user.Id,
-		"name":  user.Username,
-		"nbf":   time.Now().Unix(),
-		"iat":   time.Now().Unix(),
-		"exp":   time.Now().Unix() + 3*60*60,
-		"iss":   "myxy99.cn",
+		"email":     user.Email,
+		"id":        user.Id,
+		"name":      user.Username,
+		"authority": user.Authority,
+		"nbf":       time.Now().Unix(),
+		"iat":       time.Now().Unix(),
+		"exp":       time.Now().Unix() + 3*60*60,
+		"iss":       "myxy99.cn",
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claim)
 	tokens, err := token.SignedString([]byte(JwtSecret))
@@ -62,6 +64,7 @@ func (user *JwtUserInfo) ParseToken(tokens string) (err error) {
 	}
 	user.Email = claim["email"].(string)
 	user.Username = claim["name"].(string)
+	user.Authority = claim["authority"].(int)
 	user.Id = claim["id"].(uint)
 	return err
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"shopping/models"
-	"shopping/rabbitmq"
 	"shopping/utils"
 	"strconv"
 	"sync"
@@ -31,7 +30,7 @@ type SpikeService struct {
 	HostList         []string
 	Port             string
 	CommodityCache   map[int]int
-	RabbitMqValidate *rabbitmq.RabbitMQ
+	RabbitMqValidate *RabbitMQ
 }
 
 func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int, token string) (err error) {
@@ -68,6 +67,9 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int, token 
 		//代理处理
 		res, _, _ := utils.GetCurl(fmt.Sprintf("http://%v:%v/spike/%v", ip, s.Port, commodityId), token)
 		if res.StatusCode == 200 {
+			mutex.Lock()
+			defer mutex.Unlock()
+			s.CommodityCache[commodityId]--
 			return nil
 		}
 		return errors.New("未抢到！")

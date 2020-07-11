@@ -2,6 +2,8 @@ package main
 
 import (
 	"fmt"
+	"github.com/didip/tollbooth"
+	"github.com/didip/tollbooth_gin"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
 	"os"
@@ -21,7 +23,7 @@ var (
 	//端口
 	port = "8081"
 	//记录现在的秒杀商品的数量
-	commodityCache []map[uint]int
+	commodityCache []map[int]int
 
 	//hash环
 	consistent utils.ConsistentHashImp
@@ -43,16 +45,36 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	tmpInfo := make(map[uint]int)
+	tmpInfo := make(map[int]int)
 	for _, value := range *commodityList {
-		tmpInfo[value.ID] = value.Stock
-		commodityCache = append(commodityCache, tmpInfo)
+		tmpInfo[int(value.ID)] = value.Stock
 	}
 
 	app := gin.Default()
-	spikeController := &controllers.SpikeController{} //, middleware.Auth()
-	app.GET("/spike/:commodityId",middleware.Auth(), spikeController.Shopping)
-	app.GET("/", func(context *gin.Context) {
+	ip, err := utils.GetIp()
+	if err != nil {
+		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Panic("ip获取失败")
+		os.Exit(1)
+		return
+	}
+
+	simple := services.NewRabbitMQSimple("myxy99Shopping")
+
+	spikeService := &services.SpikeService{
+		Consistent:       consistent,
+		LocalHost:        ip,
+		HostList:         hostList,
+		Port:             port,
+		CommodityCache:   tmpInfo,
+		RabbitMqValidate: simple,
+	}
+
+	spikeController := &controllers.SpikeController{SpikeService: spikeService} //, middleware.Auth()
+
+	limiter := tollbooth.NewLimiter(1, nil)
+	app.GET("/spike/:commodityId", middleware.Auth(), spikeController.Shopping)
+
+	app.GET("/", tollbooth_gin.LimitHandler(limiter), func(context *gin.Context) {
 		context.JSON(200, gin.H{"data": 1})
 	})
 

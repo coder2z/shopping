@@ -3,6 +3,7 @@ package repositories
 import (
 	"github.com/jinzhu/gorm"
 	"shopping/models"
+	"time"
 )
 
 type CommodityRepositoryImp interface {
@@ -62,6 +63,8 @@ func (r *CommodityRepository) Update(id int, c *models.Commodity) (err error) {
 }
 
 func (r *CommodityRepository) UpdateStockMinusOne(id int) (err error) {
-	err = r.Db.Model(&models.Commodity{}).Where("id=?", id).UpdateColumn("stock", gorm.Expr("stock - ?", 1)).Error
+	err = r.Db.Model(&models.Commodity{}).Where("start_time > ?", time.Now().Unix()).
+		Where("id=?", id).
+		UpdateColumn("stock", gorm.Expr("stock - ?", 1)).Error
 	return
 }

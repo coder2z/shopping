@@ -1,11 +1,10 @@
-package rabbitmq
+package services
 
 import (
 	"encoding/json"
 	"fmt"
 	log "github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
-	"shopping/services"
 	"shopping/utils"
 	"sync"
 )
@@ -98,7 +97,7 @@ func (r *RabbitMQ) PublishSimple(message string) error {
 }
 
 //simple 模式下消费者
-func (r *RabbitMQ) ConsumeSimple(orderService services.OrderServiceImp, productService services.CommodityServiceImp) {
+func (r *RabbitMQ) ConsumeSimple(orderService OrderServiceImp, productService CommodityServiceImp) {
 	//1.申请队列，如果队列不存在会自动创建，存在则跳过创建
 	q, err := r.channel.QueueDeclare(
 		r.QueueName,
@@ -150,7 +149,7 @@ func (r *RabbitMQ) ConsumeSimple(orderService services.OrderServiceImp, productS
 		for d := range msgs {
 			//消息逻辑处理，可以自行设计逻辑
 			log.Printf("Received a message: %s", d.Body)
-			message := &services.MessageService{}
+			message := &MessageService{}
 			err := json.Unmarshal([]byte(d.Body), message)
 			if err != nil {
 				fmt.Println(err)

@@ -46,13 +46,13 @@ func InitRouter() *gin.Engine {
 		api.POST("/register", userController.Register)
 		api.GET("/me", middleware.Auth(), userController.Info)
 
-		api.POST("/commodity", commodityController.AddCommodity)
-		api.DELETE("/commodity/:id", commodityController.DelCommodity)
-		api.GET("/commodity/:id", commodityController.GetCommodityById)
-		api.GET("/commodity", commodityController.GetCommodity)
-		api.PUT("/commodity/:id", commodityController.UpdateCommodity)
+		api.POST("/commodity", middleware.Admin(), commodityController.AddCommodity)
+		api.DELETE("/commodity/:id", middleware.Admin(), commodityController.DelCommodity)
+		api.GET("/commodity/:id", middleware.Admin(), commodityController.GetCommodityById)
+		api.GET("/commodity", middleware.Admin(), commodityController.GetCommodity)
+		api.PUT("/commodity/:id", middleware.Admin(), commodityController.UpdateCommodity)
 
-		api.GET("/order", orderController.Get)
+		api.GET("/order", middleware.Admin(), orderController.Get)
 	}
 	return app
 }

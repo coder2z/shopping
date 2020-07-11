@@ -8,5 +8,5 @@ type Commodity struct {
 	Link      string `json:"link" gorm:"type:varchar(100);not null"`
 	Price     string `json:"price" gorm:"not null"`
 	Stock     int    `json:"stock" gorm:"not null"`
-	StartTime string `json:"startTime" gorm:"not null"`
+	StartTime int64  `json:"startTime" gorm:"not null"`
 }

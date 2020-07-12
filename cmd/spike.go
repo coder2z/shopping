@@ -16,14 +16,13 @@ import (
 )
 
 //基于hash环的分布式秒杀
-
 var (
 	//分布式集群地址
 	hostList = []string{"127.0.0.1", "127.0.0.2", "127.0.0.3"}
 	//端口
 	port = "8081"
 	//记录现在的秒杀商品的数量
-	commodityCache []map[int]int
+	commodityCache map[int]*models.Commodity
 
 	//hash环
 	consistent utils.ConsistentHashImp
@@ -45,9 +44,8 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	tmpInfo := make(map[int]int)
 	for _, value := range *commodityList {
-		tmpInfo[int(value.ID)] = value.Stock
+		commodityCache[int(value.ID)] = &value
 	}
 
 	app := gin.Default()
@@ -57,14 +55,14 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	ip="127.0.0.3"
+	//ip = "127.0.0.3"
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	spikeService := &services.SpikeService{
 		Consistent:       consistent,
 		LocalHost:        ip,
 		HostList:         hostList,
 		Port:             port,
-		CommodityCache:   tmpInfo,
+		CommodityCache:   commodityCache,
 		RabbitMqValidate: simple,
 	}
 

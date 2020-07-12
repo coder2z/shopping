@@ -9,6 +9,7 @@ import (
 	"shopping/utils"
 	"strconv"
 	"sync"
+	"time"
 )
 
 type SpikeServiceUri struct {
@@ -29,7 +30,7 @@ type SpikeService struct {
 	LocalHost        string
 	HostList         []string
 	Port             string
-	CommodityCache   map[int]int
+	CommodityCache   map[int]*models.Commodity
 	RabbitMqValidate *RabbitMQ
 }
 
@@ -40,11 +41,14 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int, token 
 		utils.Log.WithFields(log.Fields{"errMsg": err.Error()}).Warningln("hash环获取数据错误")
 		return errors.New("选择服务器错误")
 	}
+	if s.CommodityCache[commodityId].StartTime > time.Now().Unix() {
+		return errors.New("商品为开卖！")
+	}
 	if ip == s.LocalHost {
 		mutex.Lock()
 		defer mutex.Unlock()
-		if s.CommodityCache[commodityId] > 0 {
-			s.CommodityCache[commodityId]--
+		if s.CommodityCache[commodityId].Stock > 0 {
+			s.CommodityCache[commodityId].Stock--
 			//操作
 			message := MessageService{
 				models.Message{
@@ -70,7 +74,7 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int, token 
 		if res.StatusCode == 200 {
 			mutex.Lock()
 			defer mutex.Unlock()
-			s.CommodityCache[commodityId]--
+			s.CommodityCache[commodityId].Stock--
 			return nil
 		}
 		return errors.New("未抢到！")

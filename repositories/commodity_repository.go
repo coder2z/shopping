@@ -63,7 +63,8 @@ func (r *CommodityRepository) Update(id int, c *models.Commodity) (err error) {
 }
 
 func (r *CommodityRepository) UpdateStockMinusOne(id int) (err error) {
-	err = r.Db.Model(&models.Commodity{}).Where("start_time > ?", time.Now().Unix()).
+	err = r.Db.Model(&models.Commodity{}).
+		Where("start_time < ?", time.Now().Unix()).
 		Where("id=?", id).
 		UpdateColumn("stock", gorm.Expr("stock - ?", 1)).Error
 	return

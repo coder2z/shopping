@@ -16,7 +16,7 @@ func (c *SpikeController) Shopping(ctx *gin.Context) {
 	var spikeServiceUri services.SpikeServiceUri
 	if err := ctx.ShouldBindUri(&spikeServiceUri); err == nil {
 		userInfo, ok := ctx.Get("jwtUserInfo")
-		if ok {
+		if !ok {
 			R.Error(ctx, "系统错误", nil)
 			return
 		}
@@ -25,7 +25,7 @@ func (c *SpikeController) Shopping(ctx *gin.Context) {
 			R.Ok(ctx, "抢购成功！", nil)
 			return
 		} else {
-			R.Response(ctx, http.StatusNoContent, err.Error(), nil, http.StatusNoContent)
+			R.Response(ctx, http.StatusCreated, err.Error(), nil, http.StatusCreated)
 			return
 		}
 	} else {

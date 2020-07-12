@@ -57,9 +57,8 @@ func main() {
 		os.Exit(1)
 		return
 	}
-
+	ip="127.0.0.3"
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
-
 	spikeService := &services.SpikeService{
 		Consistent:       consistent,
 		LocalHost:        ip,
@@ -72,7 +71,7 @@ func main() {
 	spikeController := &controllers.SpikeController{SpikeService: spikeService} //, middleware.Auth()
 
 	limiter := tollbooth.NewLimiter(1, nil)
-	app.GET("/spike/:commodityId", middleware.Auth(), spikeController.Shopping)
+	app.GET("/spike/:id", tollbooth_gin.LimitHandler(limiter), middleware.Auth(), spikeController.Shopping)
 
 	app.GET("/", tollbooth_gin.LimitHandler(limiter), func(context *gin.Context) {
 		context.JSON(200, gin.H{"data": 1})

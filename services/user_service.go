@@ -41,7 +41,7 @@ func (u *UserService) Login(server *UserLoginService) (token string, err error) 
 	if ok := userInfo.CheckPassword(server.Password); !ok {
 		return "", errors.New("用户名或者密码错误")
 	}
-	jwtUserInfo := utils.JwtUserInfo{Email: userInfo.Email, Id: userInfo.ID, Username: userInfo.UserName}
+	jwtUserInfo := utils.JwtUserInfo{Email: userInfo.Email, Id: int(userInfo.ID), Username: userInfo.UserName, Authority: userInfo.Authority}
 	token, err = jwtUserInfo.GenerateToken()
 	if err != nil {
 		return "", errors.New("token生成失败")

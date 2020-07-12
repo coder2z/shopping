@@ -27,3 +27,33 @@ go run main.go //启动后台管理接口
 go run client.go //启动RabbitMQ写入数据库客户端
 
 go run spike.go //启动秒杀系统，支持横行扩展
+
+
+## 测试
+
+### 测试没有使用集群，只是一个服务器
+
+### 这里我使用测试工具是jmeter
+
+设置：
+
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090309.png)
+
+
+测试结果：
+
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712085943.png)
+
+
+RabbitMQ：
+
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090446.png)
+
+mysql:
+并没有超卖，测试添加了1000个库存
+
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090604.png)
+
+![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090629.png)
+
+

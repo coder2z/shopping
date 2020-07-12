@@ -65,6 +65,7 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int, token 
 		return errors.New("商品已卖完！")
 	} else {
 		//代理处理
+		fmt.Printf(fmt.Sprintf("http://%v:%v/spike/%v", ip, s.Port, commodityId))
 		res, _, _ := utils.GetCurl(fmt.Sprintf("http://%v:%v/spike/%v", ip, s.Port, commodityId), token)
 		if res.StatusCode == 200 {
 			mutex.Lock()

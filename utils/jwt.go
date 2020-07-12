@@ -13,13 +13,8 @@ type JWT struct {
 	SigningKey []byte
 }
 
-type JwtImp interface {
-	GenerateToken() (string, error)
-	ParseToken(tokens string) (err error)
-}
-
 type JwtUserInfo struct {
-	Id        uint   `json:"id"`
+	Id        int    `json:"id"`
 	Username  string `json:"username"`
 	Email     string `json:"email"`
 	Authority int    `json:"authority"`
@@ -64,7 +59,7 @@ func (user *JwtUserInfo) ParseToken(tokens string) (err error) {
 	}
 	user.Email = claim["email"].(string)
 	user.Username = claim["name"].(string)
-	user.Authority = claim["authority"].(int)
-	user.Id = claim["id"].(uint)
+	user.Authority = int(claim["authority"].(float64))
+	user.Id = int(claim["id"].(float64))
 	return err
 }

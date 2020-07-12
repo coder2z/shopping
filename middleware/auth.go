@@ -12,6 +12,7 @@ func Auth() gin.HandlerFunc {
 		token := c.GetHeader("Authorization")
 		if len(token) < 7 {
 			c.Abort()
+			R.Response(c, http.StatusUnauthorized, "未登录", nil, http.StatusUnauthorized)
 			return
 		}
 		jwtUserInfo := utils.JwtUserInfo{}

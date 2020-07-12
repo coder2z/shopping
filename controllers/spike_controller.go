@@ -13,8 +13,9 @@ type SpikeController struct {
 }
 
 func (c *SpikeController) Shopping(ctx *gin.Context) {
-	var spikeServiceUri services.SpikeServiceUri
-	if err := ctx.ShouldBindUri(&spikeServiceUri); err == nil {
+	s, ok := ctx.Get("spikeServiceUri")
+	spikeServiceUri := s.(services.SpikeServiceUri)
+	if ok {
 		userInfo, ok := ctx.Get("jwtUserInfo")
 		if !ok {
 			R.Error(ctx, "系统错误", nil)
@@ -29,7 +30,7 @@ func (c *SpikeController) Shopping(ctx *gin.Context) {
 			return
 		}
 	} else {
-		R.Response(ctx, http.StatusUnprocessableEntity, "参数错误", err.Error(), http.StatusUnprocessableEntity)
+		R.Response(ctx, http.StatusUnprocessableEntity, "参数错误", nil, http.StatusUnprocessableEntity)
 		return
 	}
 }

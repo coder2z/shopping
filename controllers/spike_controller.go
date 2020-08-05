@@ -22,7 +22,7 @@ func (c *SpikeController) Shopping(ctx *gin.Context) {
 			return
 		}
 		info := userInfo.(utils.JwtUserInfo)
-		if err := c.SpikeService.Shopping(&info, spikeServiceUri.Id, ctx.GetHeader("Authorization")); err == nil {
+		if err := c.SpikeService.Shopping(&info, spikeServiceUri.Id); err == nil {
 			R.Ok(ctx, "抢购成功！", nil)
 			return
 		} else {

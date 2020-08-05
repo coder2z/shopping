@@ -65,10 +65,6 @@ func main() {
 	//ip = "127.0.0.3"
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	spikeService := &services.SpikeService{
-		Consistent:       consistent,
-		LocalHost:        ip,
-		HostList:         hostList,
-		Port:             port,
 		CommodityCache:   &commodityCache,
 		RabbitMqValidate: simple,
 	}
@@ -97,6 +93,13 @@ func Ip(Consistent utils.ConsistentHashImp, LocalHost string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
+			mutex.Lock()
+			defer mutex.Unlock()
+			if commodityCache[spikeServiceUri.Id].Stock < 0 {
+				R.Response(c, http.StatusCreated, "商品已经卖完", nil, http.StatusCreated)
+				c.Abort()
+				return
+			}
 			if ip == LocalHost {
 				c.Next()
 				return
@@ -104,10 +107,7 @@ func Ip(Consistent utils.ConsistentHashImp, LocalHost string) gin.HandlerFunc {
 				//代理处理
 				res, _, _ := utils.GetCurl(fmt.Sprintf("http://%v:%v/spike/%v", ip, port, c.Param("id")), c.GetHeader("Authorization"))
 				if res.StatusCode == 200 {
-					mutex.Lock()
-					defer mutex.Unlock()
-					commodityCache[spikeServiceUri.Id].Stock--
-					R.Response(c, http.StatusCreated, "成功抢到", nil, http.StatusCreated)
+					R.Response(c, http.StatusOK, "成功抢到", nil, http.StatusOK)
 					c.Abort()
 					return
 				} else {

@@ -17,7 +17,7 @@
 
 ## 架构
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712131203.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712131203.png)
 
 ## 启动
 cd /cmd
@@ -37,23 +37,23 @@ go run spike.go //启动秒杀系统，支持横行扩展
 
 设置：
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090309.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712090309.png)
 
 
 测试结果：
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712085943.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712085943.png)
 
 
 RabbitMQ：
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090446.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712090446.png)
 
 mysql:
 并没有超卖，测试添加了1000个库存
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090604.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712090604.png)
 
-![](https://gitee.com/myxy99/pic/raw/master/img/blog/2020/07/12/20200712090629.png)
+![](https://oss.codery.cn/images/2020/07/12/20200712090629.png)
 
 

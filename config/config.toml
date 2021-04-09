@@ -1,0 +1,16 @@
+[db]
+name = "root"
+pw = "root"
+addr = "127.0.0.1:3306"
+dbname = "shopping"
+[server]
+port = 8080
+[redis]
+addr = "127.0.0.1:6379"
+name = ""
+pw = ""
+db = 0
+[etcd]
+endpoints = [
+    "127.0.0.1:7894",
+]

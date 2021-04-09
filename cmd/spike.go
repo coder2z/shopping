@@ -1,14 +1,23 @@
 package main
 
 import (
+	"context"
+	"flag"
 	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/coder2z/g-saber/xcast"
+	"github.com/coder2z/g-saber/xcfg"
 	"github.com/didip/tollbooth"
 	"github.com/didip/tollbooth_gin"
 	"github.com/gin-gonic/gin"
 	log "github.com/sirupsen/logrus"
+	"go.etcd.io/etcd/clientv3"
 	"net/http"
 	"os"
+	"shopping/cache"
+	"shopping/constant"
 	"shopping/controllers"
+	"shopping/discovery"
 	"shopping/middleware"
 	"shopping/models"
 	"shopping/repositories"
@@ -16,7 +25,7 @@ import (
 	"shopping/services"
 	"shopping/utils"
 	"strconv"
-	"sync"
+	"time"
 )
 
 //基于hash环的分布式秒杀
@@ -25,20 +34,53 @@ var (
 	hostList = []string{"127.0.0.1", "127.0.0.2", "127.0.0.3"}
 	//端口
 	port = "8081"
-	//记录现在的秒杀商品的数量
-	commodityCache map[int]models.Commodity
-	//锁
-	mutex sync.Mutex
 
 	//hash环
 	consistent utils.ConsistentHashImp
 )
 
 func main() {
-	consistent = utils.NewConsistent(20)
-	for _, v := range hostList {
-		consistent.Add(v)
+	flag.StringVar(&cfg, "c", "config/config.toml", "-c 	your config path")
+
+	flag.Parse()
+
+	utils.InitLog()
+
+	file, err := os.Open(cfg)
+
+	if err != nil {
+		panic(err)
 	}
+	defer file.Close()
+
+	err = xcfg.LoadFromReader(file, toml.Unmarshal)
+
+	if err != nil {
+		panic(err)
+	}
+
+	port = xcfg.GetString("server.port")
+
+	ch := make(chan []discovery.ServerInfo)
+
+	discovery.New(clientv3.Config{
+		Endpoints: xcfg.GetStringSlice("etcd.endpoints"),
+	}, ch)
+
+	select {
+	case x := <-ch:
+		UpdateAddress(x)
+	case <-time.After(time.Minute):
+		panic("not resolve success in one minute")
+	}
+
+	go func() {
+		for i := range ch {
+			UpdateAddress(i)
+		}
+	}()
+
+	cache.RedisHandle()
 	//缓存所有需要秒杀的商品的库存
 	models.Init()
 	models.MysqlHandler.AutoMigrate(models.Order{})
@@ -51,8 +93,18 @@ func main() {
 		os.Exit(1)
 		return
 	}
+
+	if commodityList == nil {
+		utils.Log.Panic("无秒杀商品")
+	}
+
 	for _, value := range *commodityList {
-		commodityCache[int(value.ID)] = value
+		err = utils.AddStock(context.Background(),
+			constant.SpikeKey.Format(value.ID),
+			xcast.ToInt64(value.Stock))
+		if err != nil {
+			utils.Log.Panic(err)
+		}
 	}
 
 	app := gin.Default()
@@ -65,14 +117,15 @@ func main() {
 	//ip = "127.0.0.3"
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	spikeService := &services.SpikeService{
-		CommodityCache:   &commodityCache,
 		RabbitMqValidate: simple,
 	}
 
-	spikeController := &controllers.SpikeController{SpikeService: spikeService} //, middleware.Auth()
+	spikeController := &controllers.SpikeController{SpikeService: spikeService}
 
 	limiter := tollbooth.NewLimiter(1, nil)
-	app.GET("/:uid/spike/:id", tollbooth_gin.LimitHandler(limiter), Ip(consistent, ip), middleware.Auth(), spikeController.Shopping)
+	app.GET("/:uid/spike/:id", tollbooth_gin.LimitHandler(limiter), middleware.Auth(), Ip(consistent, ip), spikeController.Shopping)
+
+	app.GET("/local/:uid/spike/:id", spikeController.Shopping)
 
 	app.GET("/", tollbooth_gin.LimitHandler(limiter), func(context *gin.Context) {
 		context.JSON(200, gin.H{"data": 1})
@@ -93,19 +146,11 @@ func Ip(Consistent utils.ConsistentHashImp, LocalHost string) gin.HandlerFunc {
 				c.Abort()
 				return
 			}
-			mutex.Lock()
-			defer mutex.Unlock()
-			if commodityCache[spikeServiceUri.Id].Stock < 0 {
-				R.Response(c, http.StatusCreated, "商品已经卖完", nil, http.StatusCreated)
-				c.Abort()
-				return
-			}
 			if ip == LocalHost {
 				c.Next()
 				return
 			} else {
-				//代理处理
-				res, _, _ := utils.GetCurl(fmt.Sprintf("http://%v:%v/spike/%v", ip, port, c.Param("id")), c.GetHeader("Authorization"))
+				res, _, _ := utils.GetCurl(fmt.Sprintf("http://%s:%s/local/%s/spike/%s", ip, port, c.Param("uid"), c.Param("id")), c.GetHeader("Authorization"))
 				if res.StatusCode == 200 {
 					R.Response(c, http.StatusOK, "成功抢到", nil, http.StatusOK)
 					c.Abort()
@@ -121,5 +166,18 @@ func Ip(Consistent utils.ConsistentHashImp, LocalHost string) gin.HandlerFunc {
 			c.Abort()
 			return
 		}
+	}
+}
+
+func UpdateAddress(info []discovery.ServerInfo) {
+	var list []string
+	for _, serverInfo := range info {
+		list = append(list, serverInfo.Ip)
+	}
+	hostList = list
+
+	consistent = utils.NewConsistent(20)
+	for _, v := range hostList {
+		consistent.Add(v)
 	}
 }

@@ -1,11 +1,12 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
+	"shopping/constant"
 	"shopping/models"
 	"shopping/utils"
-	"time"
 )
 
 type SpikeServiceUri struct {
@@ -18,14 +19,12 @@ type SpikeServiceImp interface {
 }
 
 type SpikeService struct {
-	CommodityCache   *map[int]models.Commodity
 	RabbitMqValidate *RabbitMQ
 }
 
 func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int) (err error) {
-	a := *s.CommodityCache
-	if a[commodityId].StartTime > time.Now().Unix() {
-		return errors.New("商品未开卖！")
+	if !utils.Limit(context.Background(), constant.SpikeKey.Format(commodityId)) {
+		return errors.New("商品已经卖完")
 	}
 	//操作
 	message := MessageService{
@@ -42,6 +41,5 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int) (err e
 	if err != nil {
 		return errors.New("数据编码失败")
 	}
-	a[commodityId].Stock--
 	return nil
 }

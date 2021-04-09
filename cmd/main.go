@@ -1,13 +1,37 @@
 package main
 
 import (
+	"flag"
+	"fmt"
+	"github.com/BurntSushi/toml"
+	"github.com/coder2z/g-saber/xcfg"
+	"os"
 	"shopping/models"
 	"shopping/router"
 	"shopping/utils"
 )
 
+var cfg string
+
 func main() {
+	flag.StringVar(&cfg, "c", "config/config.toml", "-c 	your config path")
+
+	flag.Parse()
+
 	utils.InitLog()
+
+	file, err := os.Open(cfg)
+
+	if err != nil {
+		panic(err)
+	}
+	defer file.Close()
+
+	err = xcfg.LoadFromReader(file, toml.Unmarshal)
+
+	if err != nil {
+		panic(err)
+	}
 
 	models.Init()
 	models.MysqlHandler.AutoMigrate(models.User{})
@@ -19,5 +43,5 @@ func main() {
 
 	app := router.InitRouter()
 
-	_ = app.Run(":8080")
+	_ = app.Run(fmt.Sprintf(":%d", xcfg.GetInt("server.port")))
 }

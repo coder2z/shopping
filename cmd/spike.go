@@ -114,7 +114,7 @@ func main() {
 		os.Exit(1)
 		return
 	}
-	//ip = "127.0.0.3"
+
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	spikeService := &services.SpikeService{
 		RabbitMqValidate: simple,

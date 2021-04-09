@@ -35,10 +35,12 @@ func (s *SpikeService) Shopping(info *utils.JwtUserInfo, commodityId int) (err e
 	}
 	byteMessage, err := json.Marshal(message)
 	if err != nil {
+		_ = utils.StockAddOne(context.Background(), constant.SpikeKey.Format(commodityId))
 		return errors.New("数据编码失败")
 	}
 	err = s.RabbitMqValidate.PublishSimple(string(byteMessage))
 	if err != nil {
+		_ = utils.StockAddOne(context.Background(), constant.SpikeKey.Format(commodityId))
 		return errors.New("数据编码失败")
 	}
 	return nil

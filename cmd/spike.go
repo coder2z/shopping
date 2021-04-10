@@ -115,6 +115,8 @@ func main() {
 		return
 	}
 
+	services.UpdateMQUrl(xcfg.GetString("mq.url"))
+
 	simple := services.NewRabbitMQSimple("myxy99Shopping")
 	spikeService := &services.SpikeService{
 		RabbitMqValidate: simple,

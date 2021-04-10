@@ -10,7 +10,11 @@ import (
 )
 
 //连接信息
-const MQURL = "amqp://admin:admin@127.0.0.1:5672/shopping"
+var MQURL = "amqp://admin:admin@127.0.0.1:5672/shopping"
+
+func UpdateMQUrl(s string) {
+	MQURL = s
+}
 
 //rabbitMQ结构体
 type RabbitMQ struct {

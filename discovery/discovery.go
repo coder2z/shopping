@@ -28,8 +28,8 @@ type RegDis struct {
 }
 
 type ServerInfo struct {
-	Ip   string
-	Port int
+	Ip   string `json:"ip"`
+	Port int    `json:"port"`
 }
 
 func New(conf clientv3.Config, ch chan<- []ServerInfo) *RegDis {
@@ -39,10 +39,8 @@ func New(conf clientv3.Config, ch chan<- []ServerInfo) *RegDis {
 			panic(err)
 		}
 		r = &RegDis{etcd: etcdC, closeCh: make(chan struct{})}
-
-		r.reg() //注册自己
-
-		r.dis(ch) //发现别人
+		r.reg()      //注册自己
+		go r.dis(ch) //发现别人
 	})
 	return r
 }
@@ -146,11 +144,9 @@ func (r *RegDis) dis(ch chan<- []ServerInfo) {
 		ch <- i
 	}
 
-	go func() {
-		eventCh := r.etcd.Watch(context.Background(), constant.EtcdKey, clientv3.WithPrefix())
-		for range eventCh {
-			ch <- update()
-		}
-	}()
+	eventCh := r.etcd.Watch(context.Background(), constant.EtcdKey, clientv3.WithPrefix())
+	for range eventCh {
+		ch <- update()
+	}
 	return
 }

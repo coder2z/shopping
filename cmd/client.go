@@ -13,15 +13,17 @@ import (
 
 //消息队列客户端用于写入数据库防止暴库
 
+var clientcfg string
+
 func main() {
 
-	flag.StringVar(&cfg, "c", "config/config.toml", "-c 	your config path")
+	flag.StringVar(&clientcfg, "c", "config/config.toml", "-c 	your config path")
 
 	flag.Parse()
 
 	utils.InitLog()
 
-	file, err := os.Open(cfg)
+	file, err := os.Open(clientcfg)
 
 	if err != nil {
 		panic(err)

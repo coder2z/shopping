@@ -37,16 +37,18 @@ var (
 
 	//hash环
 	consistent utils.ConsistentHashImp
+
+ 	scfg string
 )
 
 func main() {
-	flag.StringVar(&cfg, "c", "config/config.toml", "-c 	your config path")
+	flag.StringVar(&scfg, "c", "config/config.toml", "-c 	your config path")
 
 	flag.Parse()
 
 	utils.InitLog()
 
-	file, err := os.Open(cfg)
+	file, err := os.Open(scfg)
 
 	if err != nil {
 		panic(err)

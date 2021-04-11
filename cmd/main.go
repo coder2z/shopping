@@ -11,16 +11,16 @@ import (
 	"shopping/utils"
 )
 
-var cfg string
+var maincfg string
 
 func main() {
-	flag.StringVar(&cfg, "c", "config/config.toml", "-c 	your config path")
+	flag.StringVar(&maincfg, "c", "config/config.toml", "-c 	your config path")
 
 	flag.Parse()
 
 	utils.InitLog()
 
-	file, err := os.Open(cfg)
+	file, err := os.Open(maincfg)
 
 	if err != nil {
 		panic(err)

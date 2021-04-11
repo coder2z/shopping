@@ -30,7 +30,7 @@ func Limit(ctx context.Context, key string) bool {
 }
 
 func AddStock(ctx context.Context, key string, num int64) error {
-	return cache.RedisHandle().IncrBy(ctx, key, num).Err()
+	return cache.RedisHandle().Set(ctx, key, num, 0).Err()
 }
 
 func StockAddOne(ctx context.Context, key string) error {

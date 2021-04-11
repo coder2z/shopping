@@ -8,17 +8,16 @@ import (
 )
 
 var (
-	rc  *redis.Client
+	rc  *redis.ClusterClient
 	one sync.Once
 )
 
-func RedisHandle() *redis.Client {
+func RedisHandle() *redis.ClusterClient {
 	one.Do(func() {
-		rc = redis.NewClient(&redis.Options{
-			Addr:     xcfg.GetString("redis.addr"),
+		rc = redis.NewClusterClient(&redis.ClusterOptions{
+			Addrs:    xcfg.GetStringSlice("redis.addr"),
 			Username: xcfg.GetString("redis.name"),
 			Password: xcfg.GetString("redis.pw"),
-			DB:       xcfg.GetInt("redis.db"),
 		})
 		ping := rc.Ping(context.Background())
 		if ping.Err() != nil {

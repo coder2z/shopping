@@ -38,7 +38,7 @@ var (
 	//hash环
 	consistent utils.ConsistentHashImp
 
- 	scfg string
+	scfg string
 )
 
 func main() {
@@ -129,7 +129,7 @@ func main() {
 	limiter := tollbooth.NewLimiter(1, nil)
 	app.GET("/:uid/spike/:id", tollbooth_gin.LimitHandler(limiter), middleware.Auth(), Ip(consistent, ip), spikeController.Shopping)
 
-	app.GET("/local/:uid/spike/:id", spikeController.Shopping)
+	app.GET("/local/:uid/spike/:id", middleware.Local(hostList), spikeController.Shopping)
 
 	app.GET("/", tollbooth_gin.LimitHandler(limiter), func(context *gin.Context) {
 		context.JSON(200, gin.H{"data": 1})

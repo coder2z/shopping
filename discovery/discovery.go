@@ -146,9 +146,11 @@ func (r *RegDis) dis(ch chan<- []ServerInfo) {
 		ch <- i
 	}
 
-	eventCh := r.etcd.Watch(context.Background(), constant.EtcdKey, clientv3.WithPrefix())
-	for range eventCh {
-		ch <- update()
-	}
+	go func() {
+		eventCh := r.etcd.Watch(context.Background(), constant.EtcdKey, clientv3.WithPrefix())
+		for range eventCh {
+			ch <- update()
+		}
+	}()
 	return
 }
